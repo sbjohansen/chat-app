@@ -9,6 +9,8 @@ const messageContentInput = document.querySelector('#message-content');
 
 var userName = '';
 var messages = [];
+const socket = io();
+socket.on('message', ({ author, content }) => addMessage(author, content));
 
 //functions
 
@@ -19,33 +21,41 @@ const login = (e) => {
         loginForm.classList.remove('show');
         messagesSection.classList.add('show');
         addMessageForm.classList.add('show');
+        socket.emit('join', userName);
     } else {
         alert('Please enter a username');
     }
 };
 
-const sendMessage = (e) => {
+function sendMessage(e) {
     e.preventDefault();
-    if (messageContentInput.value.length > 0) {
-        addMessage(userName, messageContentInput.value);
-    } else {
-        alert('Please enter a message');
-    }
-};
 
-const addMessage = (author, content) => {
+    let messageContent = messageContentInput.value;
+
+    if (!messageContent.length) {
+        alert('You have to type something!');
+    } else {
+        addMessage(userName, messageContent);
+        socket.emit('message', { author: userName, content: messageContent });
+        messageContentInput.value = '';
+    }
+}
+
+function addMessage(author, content) {
     const message = document.createElement('li');
     message.classList.add('message');
     message.classList.add('message--received');
-    if (author === userName) message.classList.add('message--self');
+    if (author === userName) {
+        message.classList.add('message--self');
+    }
     message.innerHTML = `
-    <h3 class="message__author">${userName === author ? 'You' : author}</h3>
-    <div class="message__content">
+        <h3 class="message__author">${userName === author ? 'You' : author}</h3>
+        <div class="message__content">
         ${content}
-    </div>
+        </div>
     `;
     messagesList.appendChild(message);
-};
+}
 
 //event listeners
 
