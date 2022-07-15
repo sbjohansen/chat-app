@@ -33,11 +33,11 @@ io.on('connection', (socket) => {
     });
     socket.on('disconnect', () => {
         if (users.length > 0) {
-            userName = users.filter((user) => user.id === socket.id)[0].name;
-            users = users.filter((user) => user.id !== socket.id);
+            const user = users.find((user) => user.id === socket.id);
+            users.splice(users.indexOf(user), 1);
             socket.broadcast.emit('message', {
                 author: 'Chatbot',
-                content: `<i>${userName} has left the conversation... :(`,
+                content: `<i>${user.name} has left the conversation... :(`,
             });
         }
     });
